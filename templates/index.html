@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English to Kannada Translator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🌐 English to Kannada Translator</h1>
+            <p class="subtitle">Translate English text to Kannada with Text-to-Speech</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Input Section -->
+            <div class="section">
+                <label for="englishText" class="label">Enter English Text:</label>
+                <textarea 
+                    id="englishText" 
+                    class="textarea" 
+                    placeholder="Type your English text here... (max 5000 characters)"
+                    maxlength="5000"
+                ></textarea>
+                <div class="char-count">
+                    <span id="charCount">0</span> / 5000
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="button-group">
+                <button id="translateBtn" class="btn btn-primary">
+                    <span class="btn-icon">🚀</span> Translate & Play
+                </button>
+                <button id="copyBtn" class="btn btn-secondary" disabled>
+                    <span class="btn-icon">📋</span> Copy Translation
+                </button>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loader" class="loader hidden">
+                <div class="spinner"></div>
+                <p>Translating...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMsg" class="error-message hidden"></div>
+
+            <!-- Result Section -->
+            <div id="resultSection" class="result-section hidden">
+                <div class="result-box">
+                    <div class="result-item">
+                        <h3>English Text:</h3>
+                        <p id="originalText" class="result-text"></p>
+                    </div>
+                    <div class="result-item">
+                        <h3>Kannada Translation (ಕನ್ನಡ):</h3>
+                        <p id="kannadalText" class="result-text kannada-text"></p>
+                    </div>
+                </div>
+
+                <!-- Audio Player -->
+                <div class="audio-player">
+                    <h3>Audio:</h3>
+                    <audio id="audioPlayer" controls class="audio-control">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 English to Kannada Translator | Built with Flask & Web Technologies</p>
+        </footer>
+    </div>
+
+    <script>
+        const englishText = document.getElementById('englishText');
+        const charCount = document.getElementById('charCount');
+        const translateBtn = document.getElementById('translateBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const loader = document.getElementById('loader');
+        const errorMsg = document.getElementById('errorMsg');
+        const resultSection = document.getElementById('resultSection');
+        const originalText = document.getElementById('originalText');
+        const kannadalText = document.getElementById('kannadalText');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        // Update character count
+        englishText.addEventListener('input', () => {
+            charCount.textContent = englishText.value.length;
+        });
+
+        // Translate button click handler
+        translateBtn.addEventListener('click', async () => {
+            const text = englishText.value.trim();
+
+            if (!text) {
+                showError('Please enter some English text to translate');
+                return;
+            }
+
+            await translateText(text);
+        });
+
+        // Copy translation button
+        copyBtn.addEventListener('click', () => {
+            const text = kannadalText.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                copyBtn.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<span class="btn-icon">📋</span> Copy Translation';
+                }, 2000);
+            });
+        });
+
+        // Translate text function
+        async function translateText(text) {
+            hideError();
+            hideResult();
+            showLoader();
+            translateBtn.disabled = true;
+
+            try {
+                const response = await fetch('/translate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Translation failed');
+                }
+
+                // Display results
+                originalText.textContent = data.original;
+                kannadalText.textContent = data.translated;
+                audioPlayer.src = data.audio_url + '?t=' + Date.now();
+
+                showResult();
+                copyBtn.disabled = false;
+
+                // Auto-play audio
+                setTimeout(() => {
+                    audioPlayer.play().catch(() => {
+                        console.log('Auto-play prevented by browser');
+                    });
+                }, 500);
+
+            } catch (error) {
+                showError(error.message || 'An error occurred. Please try again.');
+                console.error('Error:', error);
+            } finally {
+                hideLoader();
+                translateBtn.disabled = false;
+            }
+        }
+
+        // UI Helper Functions
+        function showLoader() {
+            loader.classList.remove('hidden');
+            translateBtn.textContent = '⏳ Translating...';
+        }
+
+        function hideLoader() {
+            loader.classList.add('hidden');
+            translateBtn.innerHTML = '<span class="btn-icon">🚀</span> Translate & Play';
+        }
+
+        function showError(message) {
+            errorMsg.textContent = message;
+            errorMsg.classList.remove('hidden');
+        }
+
+        function hideError() {
+            errorMsg.classList.add('hidden');
+        }
+
+        function showResult() {
+            resultSection.classList.remove('hidden');
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function hideResult() {
+            resultSection.classList.add('hidden');
+        }
+
+        // Enter key to translate
+        englishText.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                translateBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
+        }
+      });
+    </script>
+  </body>
+  </html>
