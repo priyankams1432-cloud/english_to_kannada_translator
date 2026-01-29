@@ -1,4 +1,4 @@
-# 🌐 English to Kannada Translator
+for my live version https://english-to-kannada-translator-1-o835.onrender.com # 🌐 English to Kannada Translator
 
 A modern, user-friendly web application that translates English text to Kannada and generates text-to-speech audio using Flask, HTML, and CSS.
 
